@@ -14,7 +14,7 @@ export function IdleFrame({ proximityLevel, onNext }: IdleFrameProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
-      className="absolute inset-0 flex flex-col items-center justify-center gap-8"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 px-4 sm:px-6 md:px-8"
     >
       <motion.div
         animate={{ 
@@ -26,7 +26,7 @@ export function IdleFrame({ proximityLevel, onNext }: IdleFrameProps) {
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="w-64 h-64 relative"
+        className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-72 lg:h-72 relative"
       >
         <div 
           className="absolute inset-0 bg-[#FFB347]/20 rounded-full blur-3xl transition-all duration-300"
@@ -43,14 +43,14 @@ export function IdleFrame({ proximityLevel, onNext }: IdleFrameProps) {
           }}
         />
       </motion.div>
-      <div className="text-center z-10">
-        <h2 className="text-[#F4D8B8] mb-6 uppercase tracking-tight">
+      <div className="text-center z-10 px-4 w-full max-w-md md:max-w-lg lg:max-w-xl">
+        <h2 className="text-[#F4D8B8] mb-4 sm:mb-5 md:mb-6 lg:mb-8 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
           Step Closer
         </h2>
-        <div className="text-[#D4B5C8] text-sm mb-4">👣 Activate Camera</div>
+        <div className="text-[#D4B5C8] text-xs sm:text-sm md:text-base mb-3 sm:mb-4 md:mb-5">👣 Activate Camera</div>
         {proximityLevel > 0 && (
-          <div className="mt-4">
-            <div className="w-64 h-2 bg-[#5A2650]/60 rounded-full overflow-hidden mx-auto">
+          <div className="mt-3 sm:mt-4 md:mt-5">
+            <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-1.5 sm:h-2 bg-[#5A2650]/60 rounded-full overflow-hidden mx-auto">
               <motion.div 
                 className="h-full bg-[#E9A86A]"
                 initial={{ width: 0 }}
@@ -58,11 +58,11 @@ export function IdleFrame({ proximityLevel, onNext }: IdleFrameProps) {
                 transition={{ duration: 0.2 }}
               />
             </div>
-            <p className="text-[#D4B5C8] text-sm mt-2">Detecting presence...</p>
+            <p className="text-[#D4B5C8] text-xs sm:text-sm md:text-base mt-2 sm:mt-3">Detecting presence...</p>
           </div>
         )}
         {proximityLevel === 0 && (
-          <Button onClick={onNext} variant="secondary">
+          <Button onClick={onNext} variant="secondary" className="w-full sm:w-auto">
             Skip
           </Button>
         )}

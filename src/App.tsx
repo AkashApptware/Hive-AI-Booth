@@ -1,22 +1,30 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence } from 'motion/react';
 import { 
   EmotionalBackground, 
   Header,
-  HoneycombBackground,
-  Navigation
+  HoneycombBackground
 } from '@/components';
-import { WelcomeFrame, CameraCalibrationFrame, IdleFrame } from '@/components/frames';
+import { WelcomeFrame, CameraCalibrationFrame, IdleFrame } from '@/frames';
+import { useCamera, useImageCapture } from '@/hooks';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
   const totalFrames = 12;
-  const [cameraEnabled, setCameraEnabled] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState<'none' | 'requesting' | 'denied' | 'granted'>('none');
-  const [useFallback, setUseFallback] = useState(false);
   const [proximityLevel, setProximityLevel] = useState(0);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+
+  // Camera logic
+  const {
+    videoRef,
+    cameraEnabled,
+    cameraPermission,
+    useFallback,
+    startCamera,
+    setUseFallback,
+    setCameraPermission,
+  } = useCamera();
+
+  const { captureImage } = useImageCapture(videoRef, cameraEnabled, cameraPermission);
 
   const handleNext = () => {
     nextFrame();
@@ -26,15 +34,6 @@ const App: React.FC = () => {
     setCurrentFrame(prev => Math.min(prev + 1, totalFrames - 1));
   };
 
-  const prevFrame = () => {
-    setCurrentFrame(prev => Math.max(prev - 1, 0));
-  };
-
-  const goToFrame = (frame: number) => {
-    setCurrentFrame(frame);
-  };
-
-  // Proximity simulation for frame 1
   useEffect(() => {
     if (currentFrame === 1) {
       const interval = setInterval(() => {
@@ -44,40 +43,11 @@ const App: React.FC = () => {
     }
   }, [currentFrame]);
 
-  // Auto-advance from idle when proximity is detected
   useEffect(() => {
     if (currentFrame === 1 && proximityLevel >= 100) {
       setTimeout(() => nextFrame(), 1000);
     }
   }, [proximityLevel, currentFrame]);
-
-  const startCamera = async () => {
-    setCameraPermission('requesting');
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 640, height: 480 } 
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setCameraEnabled(true);
-      setUseFallback(false);
-      setCameraPermission('granted');
-      nextFrame();
-    } catch (error) {
-      setUseFallback(true);
-      setCameraPermission('denied');
-      nextFrame();
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  };
 
   return (
     <div 
@@ -87,15 +57,6 @@ const App: React.FC = () => {
       <HoneycombBackground />
       <EmotionalBackground />
       <Header currentFrame={currentFrame} />
-      
-      {/* Hidden video element for camera */}
-      <video 
-        ref={videoRef} 
-        autoPlay 
-        playsInline 
-        muted
-        className="hidden"
-      />
 
       <AnimatePresence mode="wait">
         {currentFrame === 0 && (
@@ -116,22 +77,17 @@ const App: React.FC = () => {
             cameraPermission={cameraPermission}
             useFallback={useFallback}
             onStartCamera={startCamera}
+            onCapture={captureImage}
             onTryDemo={() => {
-              setUseFallback(true);
-              setCameraPermission('denied');
-              nextFrame();
+              if (!cameraEnabled) {
+                setUseFallback(true);
+                setCameraPermission('denied');
+                nextFrame();
+              }
             }}
           />
         )}
       </AnimatePresence>
-
-      <Navigation 
-        currentFrame={currentFrame}
-        totalFrames={totalFrames}
-        onPrevious={prevFrame}
-        onNext={nextFrame}
-        onFrameChange={goToFrame}
-      />
     </div>
   );
 };

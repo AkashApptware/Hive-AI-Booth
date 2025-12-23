@@ -39,7 +39,7 @@ export function Button({
       style: {
         backgroundColor: 'transparent',
         color: colors.text,
-        borderColor: `${colors.textSecondary}80`,
+        borderColor: `${colors.textMuted}80`,
       }
     }
   };

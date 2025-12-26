@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, Sparkles, Zap } from 'lucide-react';
-import { Logo, Button, HoneycombBackground, EmotionalBackground } from '@/components';
+import { Logo, Button, HoneycombBackground, EmotionalBackground, Header } from '@/components';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,8 +38,8 @@ const HomePage: React.FC = () => {
     >
       <HoneycombBackground />
       <EmotionalBackground />
-      
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+      <Header currentFrame={1} />
+      <div className="absolute inset-0 flex flex-col md:flex-row items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#4A1F3E] via-[#4A1F3E] to-[#6B2D5C]/50" />
 
         <div className="absolute inset-0 opacity-3">
@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
             repeat: Infinity,
             ease: "easeInOut"
           }}
-          className="absolute top-[20%] left-[10%] w-[600px] h-[600px] rounded-full blur-3xl"
+          className="absolute top-[20%] left-[10%] w-[400px] h-[400px] md:w-[500px] md:h-[500px] lg:w-[550px] lg:h-[550px] xl:w-[600px] xl:h-[600px] rounded-full blur-3xl"
           style={{ backgroundColor: '#E9A86A22' }}
         />
 
@@ -76,10 +76,10 @@ const HomePage: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="w-[60%] h-full relative flex items-center justify-center p-16 z-10"
+          className="w-full md:w-[55%] lg:w-[58%] h-full relative flex items-center justify-center p-8 md:p-12 lg:p-14 z-10"
         >
           <div className="relative flex flex-col items-center justify-center">
-            <div className="relative w-[420px] h-[420px] mb-8">
+            <div className="relative w-[280px] h-[280px] md:w-[340px] md:h-[340px] lg:w-[380px] lg:h-[380px] mb-6 md:mb-7 lg:mb-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentFaceIndex}
@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
                   transition={{ duration: 0.6, ease: "easeInOut" }}
                   className="absolute inset-0"
                 >
-                  <div className="relative w-full h-full rounded-3xl overflow-hidden">
+                  <div className="relative w-full h-full rounded-2xl md:rounded-3xl overflow-hidden">
                     {/* Face Image */}
                     <div className="absolute inset-0 flex items-center justify-center bg-[#6B2D5C]/20">
                       <div 
@@ -115,21 +115,19 @@ const HomePage: React.FC = () => {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: [0, 0.5, 0.5], scale: 1 }}
                         transition={{ duration: 1.5, ease: "easeOut" }}
-                        className="absolute"
+                        className="absolute border md:border-[1.5px] border-[#E9A86A] rounded-lg md:rounded-xl lg:rounded-xl"
                         style={{
                           top: '18%',
                           left: '22%',
                           width: '56%',
                           height: '64%',
-                          border: '1.5px solid #E9A86A',
-                          borderRadius: '12px',
                         }}
                       >
                         {/* Corner markers */}
-                        <div className="absolute -top-0.5 -left-0.5 w-3 h-3 border-l-2 border-t-2 border-[#F4D8B8]" />
-                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 border-r-2 border-t-2 border-[#F4D8B8]" />
-                        <div className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-l-2 border-b-2 border-[#F4D8B8]" />
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-r-2 border-b-2 border-[#F4D8B8]" />
+                        <div className="absolute -top-0.5 -left-0.5 w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 border-l-2 border-t-2 border-[#F4D8B8]" />
+                        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 border-r-2 border-t-2 border-[#F4D8B8]" />
+                        <div className="absolute -bottom-0.5 -left-0.5 w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 border-l-2 border-b-2 border-[#F4D8B8]" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 border-r-2 border-b-2 border-[#F4D8B8]" />
                       </motion.div>
 
                       {[
@@ -143,19 +141,18 @@ const HomePage: React.FC = () => {
                           initial={{ opacity: 0, scale: 0 }}
                           animate={{ opacity: [0, 0.6, 0.6], scale: 1 }}
                           transition={{ duration: 1, delay: 0.3 + idx * 0.1, ease: "easeOut" }}
-                          className="absolute w-2 h-2 rounded-full bg-[#E9A86A]"
+                          className="absolute w-1.5 h-1.5 md:w-1.5 md:h-1.5 lg:w-2 lg:h-2 rounded-full bg-[#E9A86A] shadow-[0_0_6px_rgba(233,168,106,0.6)] md:shadow-[0_0_7px_rgba(233,168,106,0.6)] lg:shadow-[0_0_8px_rgba(233,168,106,0.6)]"
                           style={{
                             left: `${point.x}%`,
                             top: `${point.y}%`,
                             transform: 'translate(-50%, -50%)',
-                            boxShadow: '0 0 8px rgba(233, 168, 106, 0.6)'
                           }}
                         />
                       ))}
                     </motion.div>
 
                     
-                    <div className="absolute inset-0 border-2 border-[#E9A86A]/20 rounded-3xl" />
+                    <div className="absolute inset-0 border md:border-2 border-[#E9A86A]/20 rounded-2xl md:rounded-3xl" />
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -168,15 +165,15 @@ const HomePage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4 }}
-              className="px-6 py-2.5 rounded-full bg-[#6B2D5C]/40 backdrop-blur-sm border border-[#E9A86A]/30"
+              className="px-4 md:px-5 lg:px-6 py-2 md:py-2.5 rounded-full bg-[#6B2D5C]/40 backdrop-blur-sm border border-[#E9A86A]/30"
             >
-              <span className="text-[#F4D8B8] uppercase tracking-wider" style={{ fontSize: '14px' }}>
+              <span className="text-[#F4D8B8] uppercase tracking-wider text-xs md:text-sm">
                 {currentFace.expression}
               </span>
             </motion.div>
 
            
-            <div className="flex gap-2 mt-6">
+            <div className="flex gap-2 mt-4 md:mt-5 lg:mt-6">
               {faces.map((_, idx) => (
                 <button
                   key={idx}
@@ -201,16 +198,16 @@ const HomePage: React.FC = () => {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-[40%] h-full relative flex flex-col items-start justify-center p-16 pl-8 z-10"
+          className="w-full md:w-[45%] lg:w-[42%] h-full relative flex flex-col items-start justify-center p-8 md:p-12 lg:p-14 md:pl-6 lg:pl-7 z-10"
         >
         
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-10"
+            className="mb-6 md:mb-8 lg:mb-9"
           >
-            <Logo size="large" />
+            <Logo size="large" className="md:h-10 lg:h-12 xl:h-16" />
           </motion.div>
 
         
@@ -218,8 +215,7 @@ const HomePage: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-[#F4D8B8] mb-5 uppercase tracking-tight text-left"
-            style={{ fontSize: '48px', lineHeight: '1.1' }}
+            className="text-[#F4D8B8] mb-4 md:mb-4 lg:mb-5 uppercase tracking-tight text-left text-2xl md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-[48px] leading-tight"
           >
             Discover Your Design DNA
           </motion.h1>
@@ -229,8 +225,7 @@ const HomePage: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-[#D4B5C8] mb-10 text-left max-w-md"
-            style={{ fontSize: '17px', lineHeight: '1.6' }}
+            className="text-[#D4B5C8] mb-6 md:mb-8 lg:mb-9 text-left max-w-md text-sm md:text-base lg:text-base xl:text-[17px] leading-relaxed"
           >
             AI-powered emotion detection meets creative archetypes. React naturally to 4 designer moments and reveal your true design personality.
           </motion.p>
@@ -240,7 +235,7 @@ const HomePage: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-col gap-3 mb-10 w-full max-w-sm"
+            className="flex flex-col gap-2 md:gap-2.5 lg:gap-3 mb-6 md:mb-8 lg:mb-9 w-full max-w-sm"
           >
             {[
               { icon: Camera, text: 'Live Webcam', color: '#E9A86A' },
@@ -252,10 +247,10 @@ const HomePage: React.FC = () => {
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.7 + idx * 0.1 }}
-                className="flex items-center gap-3 px-5 py-3 rounded-full bg-[#6B2D5C]/30 border border-[#E9A86A]/30 backdrop-blur-sm transition-all duration-200 hover:bg-[#6B2D5C]/40 hover:border-[#E9A86A]/40"
+                className="flex items-center gap-2 md:gap-2.5 lg:gap-3 px-4 md:px-4.5 lg:px-5 py-2.5 md:py-2.5 lg:py-3 rounded-full bg-[#6B2D5C]/30 border border-[#E9A86A]/30 backdrop-blur-sm transition-all duration-200 hover:bg-[#6B2D5C]/40 hover:border-[#E9A86A]/40"
               >
-                <feature.icon className="w-4 h-4" style={{ color: feature.color }} />
-                <span className="text-[#F4D8B8] uppercase tracking-wide" style={{ fontSize: '13px' }}>
+                <feature.icon className="w-3.5 h-3.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4" style={{ color: feature.color }} />
+                <span className="text-[#F4D8B8] uppercase tracking-wide text-xs md:text-xs lg:text-xs xl:text-sm">
                   {feature.text}
                 </span>
               </motion.div>
@@ -280,8 +275,7 @@ const HomePage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.9 }}
-            className="mt-8 flex items-center gap-2 text-[#D4B5C8]/60"
-            style={{ fontSize: '12px' }}
+            className="mt-6 md:mt-7 lg:mt-8 flex items-center gap-2 text-[#D4B5C8]/60 text-xs"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M8 1L10 6H15L11 9L12.5 14L8 11L3.5 14L5 9L1 6H6L8 1Z" fill="#E9A86A" opacity="0.4" />

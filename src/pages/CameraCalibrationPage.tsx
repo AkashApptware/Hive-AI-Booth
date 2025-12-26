@@ -59,7 +59,7 @@ const CameraCalibrationPage: React.FC = () => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.6 }}
-        className="absolute inset-0 flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-4 sm:py-6 md:py-8"
+         className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pt-16 sm:pt-20 md:pt-24 lg:pt-28 pb-4 sm:pb-6 md:pb-8"
       >
         {cameraPermission !== 'none' && cameraPermission !== 'granted' && (
           <div className="mb-2 md:mb-4">
@@ -67,13 +67,13 @@ const CameraCalibrationPage: React.FC = () => {
           </div>
         )}
 
-        <div className="w-full flex items-center justify-center mb-2 md:mb-4">
+        <div className="w-full flex items-center justify-center mb-1 md:mb-2">
           {capturedImage ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="relative w-full max-w-[320px] h-[240px] sm:max-w-[400px] sm:h-[300px] md:max-w-[500px] md:h-[375px] lg:max-w-[640px] lg:h-[480px] xl:max-w-[720px] xl:h-[540px] backdrop-blur-sm rounded-xl md:rounded-2xl border overflow-hidden"
+               className="relative w-full max-w-[320px] h-[240px] sm:max-w-[400px] sm:h-[300px] md:max-w-[500px] md:h-[375px] lg:max-w-[500px] lg:h-[375px] xl:max-w-[600px] xl:h-[450px] backdrop-blur-sm rounded-xl md:rounded-2xl lg:rounded-3xl border overflow-hidden"
               style={{
                 backgroundColor: '#5A2650CC',
                 borderColor: '#E9A86A4D',
@@ -115,37 +115,37 @@ const CameraCalibrationPage: React.FC = () => {
         </div>
 
         <div className="text-center px-4">
-          <h2 className="text-[#F4D8B8] mb-2 md:mb-3 lg:mb-4 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+          <h2 className="text-[#F4D8B8] mb-1 md:mb-2 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
             Ready?
           </h2>
           <div className="mb-2 md:mb-3">
             <HintChip text="Camera Access Required" />
           </div>
           {useFallback && (
-            <p className="text-[#D4B5C8] text-xs sm:text-sm md:text-base mt-3 md:mt-4 uppercase tracking-wide">
+            <p className="text-[#D4B5C8] text-xs sm:text-sm md:text-base md:mt-4 uppercase tracking-wide">
               Demo Mode Active
             </p>
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-4 lg:gap-6 mb-4 md:mb-6 w-full max-w-md md:max-w-lg lg:max-w-xl px-4">
           {!cameraEnabled && !useFallback && (
-            <Button onClick={startCamera} variant="primary" className="w-full sm:w-auto">
+            <Button onClick={startCamera} variant="primary" >
               Allow
             </Button>
           )}
           {cameraEnabled && !useFallback && !capturedImage && (
-            <Button onClick={handleCapture} variant="primary" className="w-full sm:w-auto">
+            <Button onClick={handleCapture} variant="primary" >
               Capture
             </Button>
           )}
           {capturedImage && (
             <>
-              <Button onClick={handleTryDemo} variant="primary" className="w-full sm:w-auto">
+              <Button onClick={handleTryDemo} variant="primary" >
                 Continue
               </Button>
             </>
           )}
-          <Button onClick={() => navigate('/framepage')} variant="secondary" className="w-full sm:w-auto">
+          <Button onClick={() => navigate('/framepage')} variant="secondary" >
             Demo
           </Button>
         </div>

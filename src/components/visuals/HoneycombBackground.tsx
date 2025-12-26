@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { colors } from '../../utils/colors';
+ import { colors } from '@/utils/colors';
 
  const HoneycombBackground=()=> {
   return (

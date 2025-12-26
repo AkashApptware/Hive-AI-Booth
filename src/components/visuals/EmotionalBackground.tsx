@@ -3,7 +3,6 @@ import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import { colors } from '@/utils/colors';
 
 export function EmotionalBackground() {
-  // Real face images with different emotions - reduced to 5 faces for less clutter
   const faceImages = [
     {
       id: 1,
@@ -49,7 +48,6 @@ export function EmotionalBackground() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-60">
-      {/* Real face images scattered with animations */}
       {faceImages.map((face) => (
         <motion.div
           key={face.id}
@@ -80,7 +78,6 @@ export function EmotionalBackground() {
               boxShadow: `0 0 40px ${face.color}40`
             }}
           >
-            {/* Face image */}
             <ImageWithFallback
               src={face.url}
               alt={face.emotion}
@@ -88,7 +85,6 @@ export function EmotionalBackground() {
               style={{ objectPosition: 'center center' }}
             />
             
-            {/* Color overlay matching brand colors */}
             <div 
               className="absolute inset-0 mix-blend-overlay"
               style={{
@@ -97,7 +93,6 @@ export function EmotionalBackground() {
               }}
             />
             
-            {/* Vignette effect */}
             <div 
               className="absolute inset-0"
               style={{
@@ -108,7 +103,6 @@ export function EmotionalBackground() {
         </motion.div>
       ))}
 
-      {/* Larger floating face for more depth - just one */}
       <motion.div
         animate={{
           x: [0, 20, 0],
@@ -154,7 +148,6 @@ export function EmotionalBackground() {
         </div>
       </motion.div>
 
-      {/* Gradient overlays for depth and atmosphere */}
       <motion.div
         animate={{
           opacity: [0.1, 0.2, 0.1]

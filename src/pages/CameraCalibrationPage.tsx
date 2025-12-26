@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
   EmotionalBackground, 
@@ -13,6 +14,7 @@ import { useCamera } from '@/hooks';
 import { captureImageFromVideo } from '@/utils';
 
 const CameraCalibrationPage: React.FC = () => {
+  const navigate = useNavigate();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const {
@@ -143,6 +145,9 @@ const CameraCalibrationPage: React.FC = () => {
               </Button>
             </>
           )}
+          <Button onClick={() => navigate('/framepage')} variant="secondary" className="w-full sm:w-auto">
+            Demo
+          </Button>
         </div>
       </motion.div>
     </div>

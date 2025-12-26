@@ -33,7 +33,6 @@ export function useCamera(): UseCameraReturn {
     } catch (error: any) {
       console.error('Camera access error:', error);
       
-      // Specific error handling
       if (error.name === 'NotFoundError') {
         console.error('Camera device not found');
       } else if (error.name === 'NotAllowedError') {
@@ -48,7 +47,6 @@ export function useCamera(): UseCameraReturn {
     }
   };
 
-  // Cleanup: Stop camera stream on unmount
   useEffect(() => {
     return () => {
       if (streamRef.current) {

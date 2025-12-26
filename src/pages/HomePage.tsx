@@ -17,7 +17,6 @@ const HomePage: React.FC = () => {
     { expression: 'celebrating', delay: 0.9, gridX: 2, gridY: 1 },
   ];
 
-  // Auto-advance carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentFaceIndex((prev) => (prev + 1) % faces.length);

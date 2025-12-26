@@ -1,21 +1,24 @@
 import { motion } from 'motion/react';
+import { colors } from '@/utils/colors';
 
 interface HintChipProps {
   text: string;
-  className?: string;
 }
 
-export function HintChip({ text, className = '' }: HintChipProps) {
+export function HintChip({ text }: HintChipProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className={`inline-block px-4 py-2 bg-[#5A2650]/60 backdrop-blur-sm border border-[#E9A86A]/30 rounded-full text-[#D4B5C8] text-sm uppercase tracking-wide ${className}`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.4 }}
+      className="inline-block px-6 py-3 backdrop-blur-sm border rounded-full text-xs uppercase tracking-widest"
+      style={{
+        backgroundColor: `${colors.surface}99`,
+        borderColor: `${colors.secondary}4D`,
+        color: colors.textMuted,
+      }}
     >
       {text}
     </motion.div>
   );
 }
-
-export default HintChip;
-

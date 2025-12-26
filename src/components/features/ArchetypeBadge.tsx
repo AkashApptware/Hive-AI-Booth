@@ -1,5 +1,4 @@
 import { motion } from 'motion/react';
-import { colors } from '@/utils/colors';
 
 interface Archetype {
   name: string;
@@ -34,7 +33,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
 
   const styles = sizeStyles[size];
 
-  // Custom hexagon SVG path (flatter hexagon)
   const createHexagonPath = (size: number) => {
     const points = [];
     for (let i = 0; i < 6; i++) {
@@ -48,7 +46,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
 
   return (
     <div className={`relative ${styles.container}`}>
-      {/* Soft multi-layer glow */}
       <motion.div
         animate={{
           scale: [1, 1.2, 1],
@@ -63,7 +60,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
         style={{ backgroundColor: archetype.color }}
       />
 
-      {/* SVG Hexagon - minimal outline style */}
       <div className="relative w-full h-full flex items-center justify-center">
         <svg
           width={styles.hexagonSize}
@@ -71,7 +67,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
           viewBox={`0 0 ${styles.hexagonSize} ${styles.hexagonSize}`}
           className="absolute"
         >
-          {/* Subtle outer glow stroke */}
           <motion.path
             d={createHexagonPath(styles.hexagonSize)}
             fill="none"
@@ -84,7 +79,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
             style={{ filter: 'blur(6px)' }}
           />
           
-          {/* Main hexagon outline - clean and minimal */}
           <motion.path
             d={createHexagonPath(styles.hexagonSize)}
             fill="none"
@@ -98,7 +92,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
             }}
           />
           
-          {/* Inner subtle fill */}
           <motion.path
             d={createHexagonPath(styles.hexagonSize)}
             fill={`${archetype.color}08`}
@@ -108,7 +101,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
             transition={{ duration: 0.8, delay: 0.5 }}
           />
           
-          {/* Small accent dots at top and bottom points */}
           {[1, 4].map((i) => {
             const angle = (Math.PI / 3) * i;
             const x = styles.hexagonSize / 2 + (styles.hexagonSize / 2.3) * Math.cos(angle);
@@ -128,7 +120,6 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
           })}
         </svg>
         
-        {/* Content - emoji only */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <motion.span 
             className={styles.emoji}
@@ -143,6 +134,3 @@ export function ArchetypeBadge({ archetype, size = 'medium' }: ArchetypeBadgePro
     </div>
   );
 }
-
-export default ArchetypeBadge;
-

@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { Camera, AlertCircle } from 'lucide-react';
-import { colors } from '../../utils/colors';
+import { colors } from '@/utils/colors';
 
 interface CameraPermissionInfoProps {
   mode: 'requesting' | 'denied' | 'granted';

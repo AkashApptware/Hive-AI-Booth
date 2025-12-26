@@ -19,7 +19,6 @@ export async function analyzeImageWithOpenAI(
       };
     }
     
-    // Prepare the payload
     const payload = {
       model: 'gpt-4o',
       messages: [
@@ -43,9 +42,6 @@ export async function analyzeImageWithOpenAI(
     };
     console.log("payload:",payload);
     
-    
-    // console.log('API Key used (first 15 chars):', openAIKey.substring(0, 15) + '...');
-    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -55,13 +51,10 @@ export async function analyzeImageWithOpenAI(
       body: JSON.stringify(payload),
     });
 
-    // console.log('OpenAI API Response status:', response.status, response.statusText);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('OpenAI API Error details:', errorData);
       
-      // Provide more specific error messages
       let errorMessage = errorData.error?.message || `API request failed with status ${response.status}`;
       if (response.status === 401) {
         errorMessage = 'Invalid API key. Please check your VITE_OPENAI_API_KEY in .env file.';
@@ -79,9 +72,6 @@ export async function analyzeImageWithOpenAI(
 
     const data = await response.json();
     
-    // console.log('OpenAI API Response received:');
-    // console.log('Response status:', response.status);
-    // console.log('Response data:', data);
     if (data.choices && data.choices[0]) {
       console.log('Analysis result:', data.choices[0].message?.content);
     }
@@ -91,7 +81,6 @@ export async function analyzeImageWithOpenAI(
       data: data,
     };
   } catch (error) {
-    // Handle CORS and network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
         success: false,

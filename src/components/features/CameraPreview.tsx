@@ -8,7 +8,6 @@ interface CameraPreviewProps {
 }
 
 export function CameraPreview({ videoRef, isActive }: CameraPreviewProps) {
-  // Ensure video plays when stream is attached
   useEffect(() => {
     if (isActive && videoRef.current && videoRef.current.srcObject) {
       videoRef.current.play().catch(error => {
@@ -25,7 +24,6 @@ export function CameraPreview({ videoRef, isActive }: CameraPreviewProps) {
         borderColor: `${colors.primary}4D`,
       }}
     >
-      {/* Video preview - always render so ref can attach */}
       <video
         ref={videoRef}
         autoPlay
@@ -46,7 +44,6 @@ export function CameraPreview({ videoRef, isActive }: CameraPreviewProps) {
         }}
       />
 
-      {/* Camera placeholder - show when video is not active */}
       {!isActive && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div 
@@ -60,7 +57,6 @@ export function CameraPreview({ videoRef, isActive }: CameraPreviewProps) {
         </div>
       )}
 
-      {/* Hexagonal grid overlay */}
       <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="hex-grid" width="60" height="52" patternUnits="userSpaceOnUse">
@@ -75,7 +71,6 @@ export function CameraPreview({ videoRef, isActive }: CameraPreviewProps) {
         <rect width="100%" height="100%" fill="url(#hex-grid)" />
       </svg>
 
-      {/* Scanning animation */}
       {isActive && (
         <motion.div
           animate={{
@@ -93,13 +88,11 @@ export function CameraPreview({ videoRef, isActive }: CameraPreviewProps) {
         />
       )}
 
-      {/* Corner indicators */}
       <div className="absolute top-2 left-2 sm:top-3 sm:left-3 md:top-4 md:left-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-l-2 border-t-2" style={{ borderColor: colors.secondary }} />
       <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-r-2 border-t-2" style={{ borderColor: colors.secondary }} />
       <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 md:bottom-4 md:left-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-l-2 border-b-2" style={{ borderColor: colors.secondary }} />
       <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 md:bottom-4 md:right-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-r-2 border-b-2" style={{ borderColor: colors.secondary }} />
 
-      {/* Status indicator */}
       <div 
         className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:bottom-4 md:bottom-6 flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm rounded-full border"
         style={{

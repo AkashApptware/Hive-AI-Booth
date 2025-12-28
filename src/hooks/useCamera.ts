@@ -33,17 +33,24 @@ export function useCamera(): UseCameraReturn {
     } catch (error: any) {
       console.error('Camera access error:', error);
       
-      if (error.name === 'NotFoundError') {
+      if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
         console.error('Camera device not found');
-      } else if (error.name === 'NotAllowedError') {
-        console.error('Camera permission denied');
+        setCameraEnabled(false);
+        throw error;
       } else if (error.name === 'NotReadableError') {
         console.error('Camera is already in use');
+        setCameraEnabled(false);
+        throw error;
+      } else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        console.error('Camera permission denied');
+        setUseFallback(true);
+        setCameraPermission('denied');
+        setCameraEnabled(false);
+      } else {
+        setUseFallback(true);
+        setCameraPermission('denied');
+        setCameraEnabled(false);
       }
-      
-      setUseFallback(true);
-      setCameraPermission('denied');
-      setCameraEnabled(false);
     }
   };
 

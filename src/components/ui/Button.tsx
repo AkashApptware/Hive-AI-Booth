@@ -7,6 +7,7 @@ interface ButtonProps {
   onClick: () => void;
   variant?: 'primary' | 'secondary' | 'ghost';
   className?:string;
+  disabled?: boolean;
 }
 
 export function Button({
@@ -14,6 +15,7 @@ export function Button({
   onClick,
   variant = 'primary',
   className: customClassName,
+  disabled = false,
 }: ButtonProps) {
   const baseStyles =
     "flex items-center justify-center gap-2 cursor-pointer rounded-xl uppercase tracking-wider transition-all " +
@@ -52,11 +54,12 @@ export function Button({
 
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={disabled ? {} : { scale: 1.05 }}
+      whileTap={disabled ? {} : { scale: 0.95 }}
       transition={{ duration: 0.2 }}
-      onClick={onClick}
-      className={`${baseStyles} ${variantClassName} ${customClassName || ''}`}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`${baseStyles} ${variantClassName} ${customClassName || ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       style={{ ...style, fontFamily: "'Hammersmith One', sans-serif" }}
     >
       {children}

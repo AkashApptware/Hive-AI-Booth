@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { toast } from 'react-toastify';
 import { 
   EmotionalBackground, 
   Header,
@@ -11,11 +12,13 @@ import {
   HintChip 
 } from '@/components';
 import { useCamera } from '@/hooks';
-import { captureImageFromVideo } from '@/utils';
+import { captureImageFromVideo, toast as toastUtil, mockAnalyzeImage, getRouteFromFrame } from '@/utils';
 
 const CameraCalibrationPage: React.FC = () => {
   const navigate = useNavigate();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [hasCheckedPermission, setHasCheckedPermission] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const {
     videoRef,
@@ -27,20 +30,145 @@ const CameraCalibrationPage: React.FC = () => {
     setCameraPermission,
   } = useCamera();
 
+  useEffect(() => {
+    const checkCameraPermission = async () => {
+      if (hasCheckedPermission) {
+        return;
+      }
+      
+      if (videoRef.current?.srcObject) {
+        if (videoRef.current) {
+          videoRef.current.play().catch(() => {});
+        }
+        setHasCheckedPermission(true);
+        return;
+      }
+      
+      if (cameraEnabled) {
+        setHasCheckedPermission(true);
+        return;
+      }
+      
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
+          
+          if (permissionStatus.state === 'granted') {
+            try {
+              await startCamera();
+            } catch (error: any) {
+              if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                toastUtil.camera.deviceError();
+              } else if (error.name === 'NotReadableError') {
+                toastUtil.camera.inUseError();
+              }
+            }
+          } else if (permissionStatus.state === 'denied') {
+            setCameraPermission('denied');
+            setUseFallback(true);
+          } else if (permissionStatus.state === 'prompt') {
+            setCameraPermission('none');
+          }
+        } else {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream.getTracks().forEach(track => track.stop());
+            try {
+              await startCamera();
+            } catch (error: any) {
+              if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                toastUtil.camera.deviceError();
+              } else if (error.name === 'NotReadableError') {
+                toastUtil.camera.inUseError();
+              }
+            }
+          } catch (error: any) {
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+              setCameraPermission('denied');
+              setUseFallback(true);
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+              if (cameraPermission !== 'granted') {
+                setCameraPermission('none');
+              } else {
+                toastUtil.camera.deviceError();
+              }
+            } else {
+              setCameraPermission('none');
+            }
+          }
+        }
+      } catch (error) {
+        if (cameraPermission === 'none' || cameraPermission === 'requesting') {
+          setCameraPermission('none');
+        }
+      } finally {
+        setHasCheckedPermission(true);
+      }
+    };
+
+    checkCameraPermission();
+  }, []);
+
+  const handleStartCamera = async () => {
+    try {
+      await startCamera();
+      toastUtil.camera.started();
+    } catch (error: any) {
+      if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        toastUtil.camera.deviceError();
+        setCameraPermission('none');
+        setUseFallback(false);
+      } else if (error.name === 'NotReadableError') {
+        toastUtil.camera.inUseError();
+        setCameraPermission('none');
+        setUseFallback(false);
+      }
+    }
+  };
+
   const handleCapture = () => {
-    if (!videoRef.current || !cameraEnabled) return;
+    if (!videoRef.current) return;
+    
+    const hasActiveStream = cameraEnabled || (videoRef.current.srcObject !== null);
+    if (!hasActiveStream) return;
 
     const base64 = captureImageFromVideo(videoRef.current);
     if (base64) {
       const dataUrl = `data:image/jpeg;base64,${base64}`;
       setCapturedImage(dataUrl);
+      toastUtil.camera.captured();
     }
   };
 
-  const handleTryDemo = () => {
-    if (!cameraEnabled) {
-      setUseFallback(true);
-      setCameraPermission('denied');
+  const handleContinue = async () => {
+    if (!capturedImage) return;
+    
+    setIsProcessing(true);
+    const toastId = toastUtil.api.loading();
+    
+    try {
+      const base64 = capturedImage.split(',')[1];
+      if (!base64) {
+        throw new Error('Invalid image data');
+      }
+      
+      const result = await mockAnalyzeImage(base64);
+      
+      toast.dismiss(toastId);
+      
+      if (result.success) {
+        toastUtil.api.success();
+        setTimeout(() => {
+          navigate(getRouteFromFrame(11));
+        }, 1000);
+      } else {
+        toastUtil.api.error(result.error);
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      toast.dismiss(toastId);
+      toastUtil.api.error(error instanceof Error ? error.message : 'An error occurred');
+      setIsProcessing(false);
     }
   };
 
@@ -79,20 +207,17 @@ const CameraCalibrationPage: React.FC = () => {
                 borderColor: '#E9A86A4D',
               }}
             >
-              {/* Captured Image */}
-              <img 
+              <img
                 src={capturedImage} 
                 alt="Captured" 
                 className="absolute inset-0 w-full h-full object-cover"
               />
 
-              {/* Corner indicators */}
               <div className="absolute top-2 left-2 sm:top-3 sm:left-3 md:top-4 md:left-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-l-2 border-t-2" style={{ borderColor: '#E9A86A' }} />
               <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-r-2 border-t-2" style={{ borderColor: '#E9A86A' }} />
               <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 md:bottom-4 md:left-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-l-2 border-b-2" style={{ borderColor: '#E9A86A' }} />
               <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 md:bottom-4 md:right-4 w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-r-2 border-b-2" style={{ borderColor: '#E9A86A' }} />
 
-              {/* Status indicator */}
               <div 
                 className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:bottom-4 md:bottom-6 flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm rounded-full border"
                 style={{
@@ -110,17 +235,30 @@ const CameraCalibrationPage: React.FC = () => {
               </div>
             </motion.div>
           ) : (
-            <CameraPreview videoRef={videoRef} isActive={cameraEnabled} />
+            <CameraPreview videoRef={videoRef} isActive={cameraEnabled || (videoRef.current?.srcObject !== null)} />
           )}
         </div>
 
         <div className="text-center px-4">
-          <h2 className="text-[#F4D8B8] mb-1 md:mb-2 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
-            Ready?
-          </h2>
-          <div className="mb-2 md:mb-3">
-            <HintChip text="Camera Access Required" />
-          </div>
+          {!capturedImage && (
+            <h2 className="text-[#F4D8B8] mb-1 md:mb-2 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+              {(() => {
+                const isScanning = cameraEnabled || (videoRef.current?.srcObject !== null);
+                return isScanning ? "Scanning..." : "Ready?";
+              })()}
+            </h2>
+          )}
+          {(() => {
+            const isScanning = cameraEnabled || (videoRef.current?.srcObject !== null);
+            if (!isScanning && !capturedImage) {
+              return (
+                <div className="mb-2 md:mb-3">
+                  <HintChip text="Camera Access Required" />
+                </div>
+              );
+            }
+            return null;
+          })()}
           {useFallback && (
             <p className="text-[#D4B5C8] text-xs sm:text-sm md:text-base md:mt-4 uppercase tracking-wide">
               Demo Mode Active
@@ -128,20 +266,27 @@ const CameraCalibrationPage: React.FC = () => {
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-4 lg:gap-6 mb-4 md:mb-6 w-full max-w-md md:max-w-lg lg:max-w-xl px-4">
-          {!cameraEnabled && !useFallback && (
-            <Button onClick={startCamera} variant="primary" >
-              Allow
-            </Button>
-          )}
-          {cameraEnabled && !useFallback && !capturedImage && (
+          {(() => {
+            const shouldShowAllow = !cameraEnabled && !videoRef.current?.srcObject && cameraPermission !== 'denied';
+            return shouldShowAllow ? (
+              <Button onClick={handleStartCamera} variant="primary" >
+                Allow
+              </Button>
+            ) : null;
+          })()}
+          {(cameraEnabled || videoRef.current?.srcObject) && !capturedImage && (
             <Button onClick={handleCapture} variant="primary" >
               Capture
             </Button>
           )}
           {capturedImage && (
             <>
-              <Button onClick={handleTryDemo} variant="primary" >
-                Continue
+              <Button 
+                onClick={handleContinue} 
+                variant="primary"
+                disabled={isProcessing}
+              >
+                {isProcessing ? 'Processing...' : 'Continue'}
               </Button>
             </>
           )}

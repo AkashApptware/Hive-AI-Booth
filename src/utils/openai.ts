@@ -4,6 +4,25 @@ export interface OpenAIImageAnalysisResponse {
   error?: string;
 }
 
+// Mock API function - returns simple JSON until real API is ready
+export async function mockAnalyzeImage(
+  imageBase64: string
+): Promise<OpenAIImageAnalysisResponse> {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Return mock success response
+  return {
+    success: true,
+    data: {
+      emotion: 'happy',
+      confidence: 0.95,
+      archetype: 'The Creator',
+      timestamp: new Date().toISOString(),
+    },
+  };
+}
+
 export async function analyzeImageWithOpenAI(
   imageBase64: string,
   apiKey: string

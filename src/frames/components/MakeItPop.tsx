@@ -8,36 +8,80 @@ interface EmotionScore {
   emotion: string;
   intensity: number;
   timestamp?: number;
+  frameNumber?: number;
 }
 
 interface MakeItPopProps {
+  currentFrame?: number;
+  emotionScores?: EmotionScore[];
   setEmotionScores?: React.Dispatch<React.SetStateAction<EmotionScore[]>>;
   onNext?: () => void;
 }
 
-const MakeItPop: React.FC<MakeItPopProps> = ({ setEmotionScores, onNext }) => {
-  const [currentEmotion, setCurrentEmotion] = useState<string | null>(null);
-  const [hasSelected, setHasSelected] = useState(false);
+const MakeItPop: React.FC<MakeItPopProps> = ({ currentFrame = 4, emotionScores = [], setEmotionScores, onNext }) => {
+  const existingScore = emotionScores.find(score => score.frameNumber === currentFrame);
+  const [currentEmotion, setCurrentEmotion] = useState<string | null>(existingScore?.emotion || null);
+  const [hasSelected, setHasSelected] = useState(!!existingScore);
+  
+  useEffect(() => {
+    const score = emotionScores.find(score => score.frameNumber === currentFrame);
+    if (score) {
+      setCurrentEmotion(score.emotion);
+      setHasSelected(true);
+      console.log('📋 [MakeItPop] Found existing score for frame', currentFrame, ':', score);
+    } else {
+      setCurrentEmotion(null);
+      setHasSelected(false);
+      console.log('📋 [MakeItPop] No existing score for frame', currentFrame);
+    }
+  }, [currentFrame, emotionScores]);
 
   const {
     videoRef,
     cameraEnabled,
   } = useCamera();
 
-  const handleEmotionDetected = (emotion: string, confidence: number) => {
-    if (hasSelected) return;
-    
-    setHasSelected(true);
-    setCurrentEmotion(emotion);
-    
+  const updateEmotionScore = (emotion: string, intensity: number) => {
     if (setEmotionScores) {
       const emotionData: EmotionScore = {
         emotion,
-        intensity: confidence,
-        timestamp: Date.now()
+        intensity,
+        timestamp: Date.now(),
+        frameNumber: currentFrame
       };
-      setEmotionScores(prev => [...prev, emotionData]);
+      
+      setEmotionScores(prev => {
+        const existingIndex = prev.findIndex(score => score.frameNumber === currentFrame);
+        if (existingIndex >= 0) {
+          const oldScore = prev[existingIndex];
+          const updated = [...prev];
+          updated[existingIndex] = emotionData;
+          console.log('🔄 [MakeItPop] Updated emotion score:', {
+            frameNumber: currentFrame,
+            oldEmotion: oldScore.emotion,
+            oldIntensity: oldScore.intensity,
+            newEmotion: emotion,
+            newIntensity: intensity,
+            allScores: updated
+          });
+          return updated;
+        } else {
+          console.log('➕ [MakeItPop] Added new emotion score:', {
+            frameNumber: currentFrame,
+            emotion,
+            intensity,
+            allScores: [...prev, emotionData]
+          });
+          return [...prev, emotionData];
+        }
+      });
     }
+  };
+
+  const handleEmotionDetected = (emotion: string, confidence: number) => {
+    setHasSelected(true);
+    setCurrentEmotion(emotion);
+    updateEmotionScore(emotion, confidence);
 
     setTimeout(() => {
       if (onNext) {
@@ -47,19 +91,9 @@ const MakeItPop: React.FC<MakeItPopProps> = ({ setEmotionScores, onNext }) => {
   };
 
   const handleManualEmotion = (emotion: string, intensity: number) => {
-    if (hasSelected) return;
-    
     setHasSelected(true);
     setCurrentEmotion(emotion);
-    
-    if (setEmotionScores) {
-      const emotionData: EmotionScore = {
-        emotion,
-        intensity,
-        timestamp: Date.now()
-      };
-      setEmotionScores(prev => [...prev, emotionData]);
-    }
+    updateEmotionScore(emotion, intensity);
 
     setTimeout(() => {
       if (onNext) {
@@ -108,7 +142,6 @@ const MakeItPop: React.FC<MakeItPopProps> = ({ setEmotionScores, onNext }) => {
       <EmotionFallback
         emotions={['🙂 Smile', '🙄 Eye roll', '😕 Confused']}
         onSelect={(emotion, confidence) => handleManualEmotion(emotion, confidence)}
-        disabled={hasSelected}
       />
     </motion.div>
   );

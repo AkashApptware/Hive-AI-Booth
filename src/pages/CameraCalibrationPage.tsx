@@ -19,6 +19,7 @@ const CameraCalibrationPage: React.FC = () => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [hasCheckedPermission, setHasCheckedPermission] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCameraDisconnected, setIsCameraDisconnected] = useState(false);
 
   const {
     videoRef,
@@ -109,19 +110,91 @@ const CameraCalibrationPage: React.FC = () => {
     checkCameraPermission();
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleStreamEnded = () => {
+      const stream = video.srcObject as MediaStream | null;
+      if (stream) {
+        const activeTracks = stream.getTracks().filter(track => track.readyState === 'live');
+        if (activeTracks.length === 0) {
+          setIsCameraDisconnected(true);
+          setCapturedImage(null);
+        }
+      }
+    };
+
+    const handleTrackEnded = () => {
+      const stream = video.srcObject as MediaStream | null;
+      if (stream) {
+        const activeTracks = stream.getTracks().filter(track => track.readyState === 'live');
+        if (activeTracks.length === 0) {
+          setIsCameraDisconnected(true);
+          setCapturedImage(null);
+        }
+      }
+    };
+
+    const checkStreamStatus = () => {
+      const stream = video.srcObject as MediaStream | null;
+      if (stream) {
+        const activeTracks = stream.getTracks().filter(track => track.readyState === 'live');
+        if (activeTracks.length === 0 && (cameraEnabled || video.srcObject)) {
+          setIsCameraDisconnected(true);
+          setCapturedImage(null);
+        } else if (activeTracks.length > 0) {
+          setIsCameraDisconnected(false);
+        }
+      } else {
+        if (cameraEnabled) {
+          setIsCameraDisconnected(true);
+          setCapturedImage(null);
+        }
+      }
+    };
+
+    video.addEventListener('ended', handleStreamEnded);
+    
+    const stream = video.srcObject as MediaStream | null;
+    if (stream) {
+      stream.getTracks().forEach(track => {
+        track.addEventListener('ended', handleTrackEnded);
+      });
+    }
+
+    const intervalId = setInterval(checkStreamStatus, 1000);
+
+    return () => {
+      video.removeEventListener('ended', handleStreamEnded);
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.removeEventListener('ended', handleTrackEnded);
+        });
+      }
+      clearInterval(intervalId);
+    };
+  }, [cameraEnabled, videoRef]);
+
   const handleStartCamera = async () => {
+    const wasDisconnected = isCameraDisconnected;
     try {
       await startCamera();
+      setIsCameraDisconnected(false);
       toastUtil.camera.started();
     } catch (error: any) {
-      if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        toastUtil.camera.deviceError();
-        setCameraPermission('none');
-        setUseFallback(false);
-      } else if (error.name === 'NotReadableError') {
-        toastUtil.camera.inUseError();
-        setCameraPermission('none');
-        setUseFallback(false);
+      if (wasDisconnected) {
+        toast.error('Camera disconnected. Please turn on your camera to continue.');
+      } else {
+        if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+          toastUtil.camera.deviceError();
+          setCameraPermission('none');
+          setUseFallback(false);
+        } else if (error.name === 'NotReadableError') {
+          toastUtil.camera.inUseError();
+          setCameraPermission('none');
+          setUseFallback(false);
+        }
       }
     }
   };
@@ -157,6 +230,13 @@ const CameraCalibrationPage: React.FC = () => {
       toast.dismiss(toastId);
       
       if (result.success) {
+        // Save API response to sessionStorage for HiveWall
+        try {
+          sessionStorage.setItem('design-hive-api-response', JSON.stringify(result.data));
+        } catch (error) {
+          console.error('Error saving API response:', error);
+        }
+        
         toastUtil.api.success();
         setTimeout(() => {
           navigate(getRouteFromFrame(11));
@@ -235,31 +315,47 @@ const CameraCalibrationPage: React.FC = () => {
               </div>
             </motion.div>
           ) : (
-            <CameraPreview videoRef={videoRef} isActive={cameraEnabled || (videoRef.current?.srcObject !== null)} />
+            <CameraPreview 
+              videoRef={videoRef} 
+              isActive={(cameraEnabled || (videoRef.current?.srcObject !== null)) && !isCameraDisconnected} 
+            />
           )}
         </div>
 
         <div className="text-center px-4">
-          {!capturedImage && (
-            <h2 className="text-[#F4D8B8] mb-1 md:mb-2 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+          {isCameraDisconnected ? (
+            <>
+              <h2 className="text-[#F4D8B8] mb-1 md:mb-2 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+                Camera Disconnected
+              </h2>
+              <p className="text-[#D4B5C8] text-xs sm:text-sm md:text-base mb-2 md:mb-3 uppercase tracking-wide">
+                Please turn on your camera to continue
+              </p>
+            </>
+          ) : (
+            <>
+              {!capturedImage && (
+                <h2 className="text-[#F4D8B8] mb-1 md:mb-2 uppercase tracking-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+                  {(() => {
+                    const isScanning = cameraEnabled || (videoRef.current?.srcObject !== null);
+                    return isScanning ? "Scanning..." : "Ready?";
+                  })()}
+                </h2>
+              )}
               {(() => {
                 const isScanning = cameraEnabled || (videoRef.current?.srcObject !== null);
-                return isScanning ? "Scanning..." : "Ready?";
+                if (!isScanning && !capturedImage) {
+                  return (
+                    <div className="mb-2 md:mb-3">
+                      <HintChip text="Camera Access Required" />
+                    </div>
+                  );
+                }
+                return null;
               })()}
-            </h2>
+            </>
           )}
-          {(() => {
-            const isScanning = cameraEnabled || (videoRef.current?.srcObject !== null);
-            if (!isScanning && !capturedImage) {
-              return (
-                <div className="mb-2 md:mb-3">
-                  <HintChip text="Camera Access Required" />
-                </div>
-              );
-            }
-            return null;
-          })()}
-          {useFallback && (
+          {useFallback && !isCameraDisconnected && (
             <p className="text-[#D4B5C8] text-xs sm:text-sm md:text-base md:mt-4 uppercase tracking-wide">
               Demo Mode Active
             </p>
@@ -267,19 +363,19 @@ const CameraCalibrationPage: React.FC = () => {
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-4 lg:gap-6 mb-4 md:mb-6 w-full max-w-md md:max-w-lg lg:max-w-xl px-4">
           {(() => {
-            const shouldShowAllow = !cameraEnabled && !videoRef.current?.srcObject && cameraPermission !== 'denied';
+            const shouldShowAllow = (!cameraEnabled && !videoRef.current?.srcObject && cameraPermission !== 'denied') || isCameraDisconnected;
             return shouldShowAllow ? (
               <Button onClick={handleStartCamera} variant="primary" >
-                Allow
+                {isCameraDisconnected ? 'Reconnect Camera' : 'Allow'}
               </Button>
             ) : null;
           })()}
-          {(cameraEnabled || videoRef.current?.srcObject) && !capturedImage && (
+          {(cameraEnabled || videoRef.current?.srcObject) && !capturedImage && !isCameraDisconnected && (
             <Button onClick={handleCapture} variant="primary" >
               Capture
             </Button>
           )}
-          {capturedImage && (
+          {capturedImage && !isCameraDisconnected && (
             <>
               <Button 
                 onClick={handleContinue} 
@@ -290,7 +386,11 @@ const CameraCalibrationPage: React.FC = () => {
               </Button>
             </>
           )}
-          <Button onClick={() => navigate('/framepage')} variant="secondary" >
+          <Button 
+            onClick={() => navigate('/framepage')} 
+            variant="secondary"
+            disabled={isCameraDisconnected}
+          >
             Demo
           </Button>
         </div>

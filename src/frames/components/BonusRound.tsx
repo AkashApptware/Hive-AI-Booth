@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Button } from '@/components';
 import { EmotionFallback } from '@/components/features';
@@ -7,28 +7,66 @@ interface EmotionScore {
   emotion: string;
   intensity: number;
   timestamp?: number;
+  frameNumber?: number;
 }
 
 interface BonusRoundProps {
+  currentFrame?: number;
+  emotionScores?: EmotionScore[];
   setEmotionScores?: React.Dispatch<React.SetStateAction<EmotionScore[]>>;
   onNext?: () => void;
 }
 
-const BonusRound: React.FC<BonusRoundProps> = ({ setEmotionScores, onNext }) => {
-  const [hasSelected, setHasSelected] = useState(false);
+const BonusRound: React.FC<BonusRoundProps> = ({ currentFrame = 7, emotionScores = [], setEmotionScores, onNext }) => {
+  const existingScore = emotionScores.find(score => score.frameNumber === currentFrame);
+  const [hasSelected, setHasSelected] = useState(!!existingScore);
+  
+  useEffect(() => {
+    const score = emotionScores.find(score => score.frameNumber === currentFrame);
+    setHasSelected(!!score);
+    if (score) {
+      console.log('📋 [BonusRound] Found existing score for frame', currentFrame, ':', score);
+    } else {
+      console.log('📋 [BonusRound] No existing score for frame', currentFrame);
+    }
+  }, [currentFrame, emotionScores]);
 
   const handleManualEmotion = (emotion: string, confidence: number) => {
-    if (hasSelected) return;
-    
     setHasSelected(true);
     
     if (setEmotionScores) {
       const emotionData: EmotionScore = {
         emotion,
         intensity: confidence,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        frameNumber: currentFrame
       };
-      setEmotionScores(prev => [...prev, emotionData]);
+      
+      setEmotionScores(prev => {
+        const existingIndex = prev.findIndex(score => score.frameNumber === currentFrame);
+        if (existingIndex >= 0) {
+          const oldScore = prev[existingIndex];
+          const updated = [...prev];
+          updated[existingIndex] = emotionData;
+          console.log('🔄 [BonusRound] Updated emotion score:', {
+            frameNumber: currentFrame,
+            oldEmotion: oldScore.emotion,
+            oldIntensity: oldScore.intensity,
+            newEmotion: emotion,
+            newIntensity: confidence,
+            allScores: updated
+          });
+          return updated;
+        } else {
+          console.log('➕ [BonusRound] Added new emotion score:', {
+            frameNumber: currentFrame,
+            emotion,
+            intensity: confidence,
+            allScores: [...prev, emotionData]
+          });
+          return [...prev, emotionData];
+        }
+      });
     }
 
     setTimeout(() => {
@@ -85,7 +123,6 @@ const BonusRound: React.FC<BonusRoundProps> = ({ setEmotionScores, onNext }) => 
       <EmotionFallback 
         emotions={['🤔 Thoughtful', '😅 Amused', '😬 Guilty']}
         onSelect={(emotion, confidence) => handleManualEmotion(emotion, confidence)}
-        disabled={hasSelected}
       />
 
       <Button onClick={handleCompleteAnalysis} variant="primary">

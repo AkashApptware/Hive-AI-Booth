@@ -56,6 +56,7 @@ const allArchetypes: Archetype[] = [
 ];
 
 const HiveWall: React.FC<HiveWallProps> = ({ selectedArchetype, onReset }) => {
+
   return (
     <motion.div
       key="frame-11"

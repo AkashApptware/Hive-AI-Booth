@@ -30,7 +30,7 @@ export function EmotionFallback({ emotions, onSelect, disabled = false }: Emotio
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: disabled ? 1 : 1.1 }}
               whileTap={{ scale: disabled ? 1 : 0.95 }}
-              onClick={() => !disabled && onSelect(emotion, 0.8)}
+              onClick={() => !disabled && onSelect(emotion, 0.7 + Math.random() * 0.2)}
               disabled={disabled}
               className="px-4 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 backdrop-blur-sm border rounded-full transition-all uppercase tracking-wider flex items-center gap-1.5 md:gap-2 text-xs md:text-sm lg:text-base"
               style={{

@@ -83,7 +83,7 @@ export function Navigation({
                 animate={{ opacity: 1, y: 0 }}
                 className="text-[#E9A86A] text-[8px] sm:text-[10px] uppercase tracking-wider"
               >
-                {i + 1}/{totalFrames}
+                {i + 1}/9
               </motion.span>
             )}
           </div>

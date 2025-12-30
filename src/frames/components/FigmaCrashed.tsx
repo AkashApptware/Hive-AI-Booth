@@ -9,37 +9,77 @@ interface EmotionScore {
   emotion: string;
   intensity: number;
   timestamp?: number;
+  frameNumber?: number;
 }
 
 interface FigmaCrashedProps {
+  currentFrame?: number;
   emotionScores?: EmotionScore[];
   setEmotionScores?: React.Dispatch<React.SetStateAction<EmotionScore[]>>;
   onNext?: () => void;
 }
 
-const FigmaCrashed: React.FC<FigmaCrashedProps> = ({ setEmotionScores, onNext }) => {
+const FigmaCrashed: React.FC<FigmaCrashedProps> = ({ currentFrame = 3, emotionScores = [], setEmotionScores, onNext }) => {
+  // Check if this frame already has a score (for updating)
   const [currentEmotion, setCurrentEmotion] = useState<string | null>(null);
-  const [hasSelected, setHasSelected] = useState(false);
+  
+  // Reset state when frame changes or when existing score is found
+  useEffect(() => {
+    const score = emotionScores.find(score => score.frameNumber === currentFrame);
+    if (score) {
+      setCurrentEmotion(score.emotion);
+      console.log('📋 Found existing score for frame', currentFrame, ':', score);
+    } else {
+      setCurrentEmotion(null);
+      console.log('📋 No existing score for frame', currentFrame);
+    }
+  }, [currentFrame, emotionScores]);
 
   const {
     videoRef,
     cameraEnabled,
   } = useCamera();
 
-  const handleEmotionDetected = (emotion: string, confidence: number) => {
-    if (hasSelected) return;
-    
-    setHasSelected(true);
-    setCurrentEmotion(emotion);
-    
+  const updateEmotionScore = (emotion: string, intensity: number) => {
     if (setEmotionScores) {
       const emotionData: EmotionScore = {
         emotion,
-        intensity: confidence,
-        timestamp: Date.now()
+        intensity,
+        timestamp: Date.now(),
+        frameNumber: currentFrame
       };
-      setEmotionScores(prev => [...prev, emotionData]);
+      
+      // Update existing score or add new one
+      setEmotionScores(prev => {
+        const existingIndex = prev.findIndex(score => score.frameNumber === currentFrame);
+        if (existingIndex >= 0) {
+          // Replace existing score for this frame
+          const updated = [...prev];
+          updated[existingIndex] = emotionData;
+          console.log('🔄 Updated emotion score:', {
+            frameNumber: currentFrame,
+            oldScore: prev[existingIndex],
+            newScore: emotionData,
+            allScores: updated
+          });
+          return updated;
+        } else {
+          // Add new score
+          console.log('➕ Added new emotion score:', {
+            frameNumber: currentFrame,
+            emotion,
+            intensity,
+            allScores: [...prev, emotionData]
+          });
+          return [...prev, emotionData];
+        }
+      });
     }
+  };
+
+  const handleEmotionDetected = (emotion: string, confidence: number) => {
+    setCurrentEmotion(emotion);
+    updateEmotionScore(emotion, confidence);
 
     setTimeout(() => {
       if (onNext) {
@@ -54,19 +94,8 @@ const FigmaCrashed: React.FC<FigmaCrashedProps> = ({ setEmotionScores, onNext })
   }, [cameraEnabled, videoRef]);
 
   const handleReactionSelect = (reaction: string, confidence: number) => {
-    if (hasSelected) return;
-    
-    setHasSelected(true);
     setCurrentEmotion(reaction);
-    
-    if (setEmotionScores) {
-      const emotionData: EmotionScore = {
-        emotion: reaction,
-        intensity: confidence,
-        timestamp: Date.now()
-      };
-      setEmotionScores(prev => [...prev, emotionData]);
-    }
+    updateEmotionScore(reaction, confidence);
 
     setTimeout(() => {
       if (onNext) {
@@ -116,7 +145,6 @@ const FigmaCrashed: React.FC<FigmaCrashedProps> = ({ setEmotionScores, onNext })
         <EmotionFallback
           emotions={['😆 Amused', '😤 Frustrated', '😐 Neutral']}
           onSelect={(emotion, confidence) => handleReactionSelect(emotion, confidence)}
-          disabled={hasSelected}
         />
       </motion.div>
     </div>

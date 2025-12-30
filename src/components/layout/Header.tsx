@@ -13,9 +13,11 @@ export function Header({ currentFrame }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="text-sm uppercase tracking-wider" style={{ color: colors.textMuted }}>
-          {currentFrame + 1} / 12
-        </div>
+        {currentFrame >= 3 && (
+          <div className="text-sm uppercase tracking-wider" style={{ color: colors.textMuted }}>
+            {currentFrame - 2} / 9
+          </div>
+        )}
         <div className="flex gap-2">
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: colors.secondary }} />
           <span className="text-xs uppercase tracking-wider" style={{ color: colors.textMuted }}>Live</span>

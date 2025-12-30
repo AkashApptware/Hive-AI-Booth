@@ -6,6 +6,7 @@ interface EmotionScore {
   emotion: string;
   intensity: number;
   timestamp?: number;
+  frameNumber?: number;
 }
 
 interface EmotionDataPanelProps {
@@ -14,6 +15,19 @@ interface EmotionDataPanelProps {
 
 const EmotionDataPanel: React.FC<EmotionDataPanelProps> = ({ emotionScores }) => {
   if (emotionScores.length === 0) return null;
+
+  // Sort by frame number to display in order
+  const sortedScores = [...emotionScores].sort((a, b) => {
+    const frameA = a.frameNumber || 0;
+    const frameB = b.frameNumber || 0;
+    return frameA - frameB;
+  });
+
+  // Map frame number to test number (Frame 3 = Test 1, Frame 4 = Test 2, etc.)
+  const getTestNumber = (frameNumber?: number): number => {
+    if (!frameNumber) return 0;
+    return frameNumber - 2; // Frame 3 -> Test 1, Frame 4 -> Test 2, etc.
+  };
 
   return (
     <motion.div 
@@ -27,27 +41,31 @@ const EmotionDataPanel: React.FC<EmotionDataPanelProps> = ({ emotionScores }) =>
       </div>
       
       <div className="space-y-3">
-        {emotionScores.map((score, i) => (
-          <div key={i} className="bg-[#4A1F3E]/40 rounded-lg p-3 border border-[#6B2D5C]/30">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[#F4D8B8] uppercase tracking-wide text-xs">Test {i + 1}</span>
-              <span className="text-[#E9A86A] text-xs">{(score.intensity * 100).toFixed(0)}%</span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-[#4A1F3E] rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${score.intensity * 100}%` }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="h-full bg-gradient-to-r from-[#E9A86A] to-[#6B2D5C] rounded-full"
-                />
+        {sortedScores.map((score, i) => {
+          const testNumber = getTestNumber(score.frameNumber);
+          return (
+            <div key={`frame-${score.frameNumber}`} className="bg-[#4A1F3E]/40 rounded-lg p-3 border border-[#6B2D5C]/30">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[#F4D8B8] uppercase tracking-wide text-xs">Test {testNumber}</span>
+                <span className="text-[#E9A86A] text-xs">{(score.intensity * 100).toFixed(0)}%</span>
               </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-[#4A1F3E] rounded-full overflow-hidden">
+                  <motion.div 
+                    key={`${score.frameNumber}-${score.intensity}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${score.intensity * 100}%` }}
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className="h-full bg-gradient-to-r from-[#E9A86A] to-[#6B2D5C] rounded-full"
+                  />
+                </div>
+              </div>
+              
+              <p className="text-[#D4B5C8] text-xs mt-2 capitalize">{score.emotion}</p>
             </div>
-            
-            <p className="text-[#D4B5C8] text-xs mt-2 capitalize">{score.emotion}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </motion.div>
   );

@@ -14,6 +14,7 @@ interface EmotionScore {
   emotion: string;
   intensity: number;
   timestamp?: number;
+  frameNumber?: number;
 }
 
 interface Archetype {
@@ -37,27 +38,27 @@ const FramePage: React.FC<FramePageProps> = ({ currentFrame = 3, emotionScores =
     <AnimatePresence mode="wait">
       {/* Frame 3: Figma Crashed */}
       {currentFrame === 3 && (
-        <FigmaCrashed key="frame-3" setEmotionScores={setEmotionScores} onNext={onNext} />
+        <FigmaCrashed key="frame-3" currentFrame={currentFrame} emotionScores={emotionScores} setEmotionScores={setEmotionScores} onNext={onNext} />
       )}
 
       {/* Frame 4: Make It Pop */}
       {currentFrame === 4 && (
-        <MakeItPop key="frame-4" setEmotionScores={setEmotionScores} onNext={onNext} />
+        <MakeItPop key="frame-4" currentFrame={currentFrame} emotionScores={emotionScores} setEmotionScores={setEmotionScores} onNext={onNext} />
       )}
 
       {/* Frame 5: Deadline Extended */}
       {currentFrame === 5 && (
-        <DeadlineExtended key="frame-5" setEmotionScores={setEmotionScores} onNext={onNext} />
+        <DeadlineExtended key="frame-5" currentFrame={currentFrame} emotionScores={emotionScores} setEmotionScores={setEmotionScores} onNext={onNext} />
       )}
 
       {/* Frame 6: Prototype Success */}
       {currentFrame === 6 && (
-        <PrototypeSuccess key="frame-6" setEmotionScores={setEmotionScores} onNext={onNext} />
+        <PrototypeSuccess key="frame-6" currentFrame={currentFrame} emotionScores={emotionScores} setEmotionScores={setEmotionScores} onNext={onNext} />
       )}
 
       {/* Frame 7: Bonus Round */}
       {currentFrame === 7 && (
-        <BonusRound key="frame-7" setEmotionScores={setEmotionScores} onNext={onNext} />
+        <BonusRound key="frame-7" currentFrame={currentFrame} emotionScores={emotionScores} setEmotionScores={setEmotionScores} onNext={onNext} />
       )}
 
       {/* Frame 8: Analyzing Moment */}

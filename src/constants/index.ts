@@ -4,7 +4,7 @@ export const ANIMATION_DURATION = {
   LONG: 1.0,
 } as const;
 
-export const TOTAL_FRAMES = 12;
+export const TOTAL_FRAMES = 9;
 
 export const EMOTION_DETECTION_INTERVAL = 1500;
 

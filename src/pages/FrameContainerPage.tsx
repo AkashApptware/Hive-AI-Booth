@@ -129,10 +129,20 @@ const FrameContainerPage: React.FC = () => {
   
   useEffect(() => {
     const frameFromRoute = getFrameFromRoute(location.pathname, location.search);
-    if (frameFromRoute !== currentFrame && frameFromRoute >= 3 && frameFromRoute <= 11) {
-      setCurrentFrame(frameFromRoute);
+    console.log('🔄 [FrameContainerPage] Route changed:', {
+      pathname: location.pathname,
+      search: location.search,
+      frameFromRoute,
+      currentFrame,
+      emotionScoresCount: emotionScores.length
+    });
+    if (frameFromRoute >= 3 && frameFromRoute <= 11) {
+      if (frameFromRoute !== currentFrame) {
+        console.log('✅ [FrameContainerPage] Updating currentFrame:', frameFromRoute, 'emotionScores preserved:', emotionScores.length);
+        setCurrentFrame(frameFromRoute);
+      }
     }
-  }, [location.pathname, location.search, currentFrame]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const FRAME_NAMES: { [key: number]: string } = {

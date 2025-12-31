@@ -10,10 +10,11 @@ const AnimatedRoutes: React.FC = () => {
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/idlepage" element={<IdlePage />} />
         <Route path="/cameracalibration" element={<CameraCalibrationPage />} />
+        <Route path="/framepage/:slug" element={<FrameContainerPage />} />
         <Route path="/framepage" element={<FrameContainerPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
